@@ -60,3 +60,19 @@ def write_to_s3(data, bucket_name, folder):
     csv_str = csv_buffer.getvalue() # Get the csv string
     # using the put_object(write) operation to write the data into s3
     s3_client.put_object(Bucket=bucket_name, Key=f'{folder}/{file_name}', Body=csv_str ) 
+
+
+def load_to_redshift(bucket_name, folder, redshift_table_name):
+    iam_role = config.get('IAM_ROLE')
+    conn = get_redshift_connection()
+    file_paths = [f's3://{bucket_name}/{file_name}' for file_name in list_files_in_folder(bucket_name, folder)]
+    for file_path in file_paths:
+        copy_query = f"""
+        copy {redshift_table_name}
+        from '{file_path}'
+        IAM_ROLE '{iam_role}'
+        csv
+        IGNOREHEADER 1;
+        """
+        execute_sql(copy_query, conn)
+    print('Data successfully loaded to Redshift')
