@@ -76,3 +76,15 @@ def load_to_redshift(bucket_name, folder, redshift_table_name):
         """
         execute_sql(copy_query, conn)
     print('Data successfully loaded to Redshift')
+    
+    
+def move_files_to_processed_folder(bucket_name, raw_data_folder, processed_data_folder):
+    file_paths = list_files_in_folder(bucket_name, raw_data_folder)
+    for file_path in file_paths:
+        file_name = file_path.split('/')[-1]
+        copy_source = {'Bucket': bucket_name, 'Key': file_path}
+        # Copy files to processed folder
+        s3_resource.meta.client.copy(copy_source, bucket_name, processed_data_folder + '/' + file_name)
+        s3_resource.Object(bucket_name, file_path).delete()
+    print("Files successfully moved to 'processed_data' folder in S3")
+    
