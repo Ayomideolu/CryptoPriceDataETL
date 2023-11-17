@@ -52,3 +52,12 @@ def generate_schema(data, table_name):
     column_type_query += ');'
     output_query = create_table_statement + column_type_query
     return output_query
+
+
+def execute_sql(sql_query, conn):
+    conn = get_redshift_connection()
+    cur = conn.cursor()
+    cur.execute(sql_query)
+    conn.commit()
+    cur.close() # Close cursor
+    conn.close() # Close connection
