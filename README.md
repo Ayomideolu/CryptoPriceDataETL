@@ -1,5 +1,5 @@
 # CryptoPriceDataETL
-This goal of this project is to generate a summarized table from the crypto price data available on the rapidapi.com.which can be used to predict crypto market price and other form of analysis.
+The goal of this project is to generate a summarized table from the crypto price data available on the rapidapi.com.which can be used to predict crypto market price and other form of analysis.
 
 On execution,this program loads all data from the api endpoint,performs data cleansing on the data, writes to s3 bucket for staging and then reads from s3 bucket  in other to transform before loading to the destination database which is  Redshift database,emptying the raw folder in the s3 bucket or moving the content of the raw folder to the processed folder in the s3 bucket in the process.
 
