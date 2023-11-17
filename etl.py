@@ -44,3 +44,11 @@ def read_from_s3(bucket_name, path):
     return data
 
 
+def read_multi_files_from_s3(bucket_name, prefix):
+    objects_list = s3_client.list_objects(Bucket = bucket_name, Prefix = prefix) # List the objects in the bucket
+    files = objects_list.get('Contents')
+    keys = [file.get('Key') for file in files][1:]
+    objs = [s3_client.get_object(Bucket = bucket_name, Key= key) for key in keys]
+    dfs = [pd.read_csv(io.BytesIO(obj['Body'].read())) for obj in objs]
+    data = pd.concat(dfs)
+    return data
