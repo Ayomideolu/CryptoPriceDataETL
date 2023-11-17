@@ -61,3 +61,10 @@ def execute_sql(sql_query, conn):
     conn.commit()
     cur.close() # Close cursor
     conn.close() # Close connection
+
+
+def list_files_in_folder(bucket_name, folder):
+    bucket_list = s3_client.list_objects(Bucket = bucket_name, Prefix = folder) # List the objects in the bucket
+    bucket_content_list = bucket_list.get('Contents')
+    files_list = [file.get('Key') for file in bucket_content_list][1:]
+    return files_list
