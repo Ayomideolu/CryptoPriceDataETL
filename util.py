@@ -68,3 +68,11 @@ def list_files_in_folder(bucket_name, folder):
     bucket_content_list = bucket_list.get('Contents')
     files_list = [file.get('Key') for file in bucket_content_list][1:]
     return files_list
+
+
+def transform_data(data):
+    data['price'] = data['price'].apply(lambda x: float(x)) # convert string column to float value
+    data['date'] = datetime.now().strftime('%Y-%m-%d-%H-%M-%S') # Add a date column
+    data['date'] = pd.to_datetime(data['date'], format ='%Y-%m-%d-%H-%M-%S')
+    data = data[['date', 'symbol', 'name', 'price', 'rank','btcPrice', 'lowVolume']]
+    return data
