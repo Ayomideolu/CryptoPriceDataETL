@@ -76,3 +76,11 @@ def transform_data(data):
     data['date'] = pd.to_datetime(data['date'], format ='%Y-%m-%d-%H-%M-%S')
     data = data[['date', 'symbol', 'name', 'price', 'rank','btcPrice', 'lowVolume']]
     return data
+
+
+
+def empty_raw_folder(bucket_name, raw_data_folder):
+    file_paths = list_files_in_folder(bucket_name, raw_data_folder)
+    for file_path in file_paths:
+        s3_resource.Object(bucket_name, file_path).delete()
+    print("Files deleted from raw data folder")
