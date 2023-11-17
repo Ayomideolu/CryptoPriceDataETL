@@ -32,3 +32,15 @@ def get_data_from_api():
     columns = ['symbol', 'name', 'price', 'rank','btcPrice', 'lowVolume']
     crypto_price_data = pd.DataFrame(coin_data)[columns]
     return crypto_price_data
+
+
+
+def read_from_s3(bucket_name, path):
+    objects_list = s3_client.list_objects(Bucket = bucket_name, Prefix = path) # List the objects in the bucket
+    file = objects_list.get('Contents')[1]
+    key = file.get('Key') # Get file path or key
+    obj = s3_client.get_object(Bucket = bucket_name, Key= key)
+    data = pd.read_csv(io.BytesIO(obj['Body'].read()))
+    return data
+
+
