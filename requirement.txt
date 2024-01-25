@@ -7,15 +7,11 @@ import io
 import psycopg2
 import ast
 from dotenv import dotenv_values
-#THIS LIBRARIES ARE REQUIRED IN YOUR UTIL.PY
+dotenv_values()
 import boto3
 import psycopg2
 import pandas as pd
 from datetime import datetime
 from dotenv import dotenv_values
 dotenv_values()
-# TO USE THE MAIN.PY FILE THIS LIBRARIES ARE NEEDED.
-from time import sleep
-from util import generate_schema, execute_sql, transform_data, get_redshift_connection, empty_raw_folder
-from etl import get_data_from_api, read_from_s3, write_to_s3, load_to_redshift, read_multi_files_from_s3, \
-move_files_to_processed_folder
+
