@@ -1,9 +1,10 @@
 
 # Import libraries
 from time import sleep
-from util import generate_schema, execute_sql, transform_data, get_redshift_connection, empty_raw_folder
-from etl import get_data_from_api, read_from_s3, write_to_s3, load_to_redshift, read_multi_files_from_s3, \
-move_files_to_processed_folder
+from util import generate_schema, execute_sql,get_redshift_connection, empty_raw_folder,\
+read_from_s3, write_to_s3,read_multi_files_from_s3,move_files_to_processed_folder       
+from etl import get_data_from_api,transform_data,load_to_redshift
+
 
 conn = get_redshift_connection()
 # Main method to run the pipeline
@@ -17,7 +18,7 @@ def main():
     redshift_table_name = 'crypto_price_data'
     counter = 1
     
-    A while loop to send 5 requests to the API
+    # A while loop to send 5 requests to the API
     while counter <= 5:
         print('Pulling data from API...')
         crypto_price_data = get_data_from_api() # Extract data from API
