@@ -1,6 +1,8 @@
 import boto3
 import psycopg2
 import pandas as pd
+from io import StringIO
+import io
 from datetime import datetime
 from dotenv import dotenv_values
 dotenv_values()
@@ -23,6 +25,32 @@ def get_redshift_connection():
     return conn
 
 
+
+def read_from_s3(bucket_name, path):
+    objects_list = s3_client.list_objects(Bucket = bucket_name, Prefix = path) # List the objects in the bucket
+    file = objects_list.get('Contents')[1]
+    key = file.get('Key') # Get file path or key
+    obj = s3_client.get_object(Bucket = bucket_name, Key= key)
+    data = pd.read_csv(io.BytesIO(obj['Body'].read()))
+    return data
+
+
+def read_multi_files_from_s3(bucket_name, prefix):
+    objects_list = s3_client.list_objects(Bucket = bucket_name, Prefix = prefix) # List the objects in the bucket
+    files = objects_list.get('Contents')
+    keys = [file.get('Key') for file in files][1:]
+    objs = [s3_client.get_object(Bucket = bucket_name, Key= key) for key in keys]
+    dfs = [pd.read_csv(io.BytesIO(obj['Body'].read())) for obj in objs]
+    data = pd.concat(dfs)
+    return data
+
+def write_to_s3(data, bucket_name, folder):
+    file_name = f"crypto_price_data_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv" # Create a file name
+    csv_buffer = StringIO() # Create a string buffer to collect csv string
+    data.to_csv(csv_buffer, index=False) # Convert dataframe to CSV file and add to buffer
+    csv_str = csv_buffer.getvalue() # Get the csv string
+    # using the put_object(write) operation to write the data into s3
+    s3_client.put_object(Bucket=bucket_name, Key=f'{folder}/{file_name}', Body=csv_str ) 
 
 def generate_schema(data, table_name):
     create_table_statement = f'CREATE TABLE IF NOT EXISTS {table_name}(\n'
@@ -70,13 +98,15 @@ def list_files_in_folder(bucket_name, folder):
     return files_list
 
 
-def transform_data(data):
-    data['price'] = data['price'].apply(lambda x: float(x)) # convert string column to float value
-    data['date'] = datetime.now().strftime('%Y-%m-%d-%H-%M-%S') # Add a date column
-    data['date'] = pd.to_datetime(data['date'], format ='%Y-%m-%d-%H-%M-%S')
-    data = data[['date', 'symbol', 'name', 'price', 'rank','btcPrice', 'lowVolume']]
-    return data
-
+def move_files_to_processed_folder(bucket_name, raw_data_folder, processed_data_folder):
+    file_paths = list_files_in_folder(bucket_name, raw_data_folder)
+    for file_path in file_paths:
+        file_name = file_path.split('/')[-1]
+        copy_source = {'Bucket': bucket_name, 'Key': file_path}
+        # Copy files to processed folder
+        s3_resource.meta.client.copy(copy_source, bucket_name, processed_data_folder + '/' + file_name)
+        s3_resource.Object(bucket_name, file_path).delete()
+    print("Files successfully moved to 'processed_data' folder in S3")
 
 
 def empty_raw_folder(bucket_name, raw_data_folder):
