@@ -27,7 +27,15 @@ HOST=your workgroup on AWS Redshift cluster
 DATABASE_NAME=your database name
 PORT=your Redshift port
 ## Running the Program
-Execute the program from your main.py module, utilizing the helper functions housed in util.py for a successful run.
+Execute the Airflow DAG by running the following command:
+
+```bash
+airflow dags trigger crypto_price_data_etl
+
+This command triggers the execution of the Airflow DAG named crypto_price_data_etl, which will orchestrate the entire ETL pipeline.
+
+
+
 
 
 
